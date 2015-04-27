@@ -247,7 +247,7 @@ public class ClosestPair {
 		// The inner loop only runs at most six times because the difference in the y-values of the points 
 		// must be less than the closest pair distance of the two subsets if the distance is to be computed
 		for (int i = 0; i < pointsWithinRange.size(); i++) {
-			for (int j = i+1; j < pointsWithinRange.size() && pointsWithinRange.get(j).getY() - pointsWithinRange.get(i).getY() < d; j++) {
+			for (int j = i+1; j < pointsWithinRange.size() && Math.abs(pointsWithinRange.get(j).getY() - pointsWithinRange.get(i).getY()) < d; j++) {
 				if (distance(pointsWithinRange.get(i), pointsWithinRange.get(j)) < d) {
 					// Update closestSplitPair
 					d = distance(pointsWithinRange.get(i), pointsWithinRange.get(j));
