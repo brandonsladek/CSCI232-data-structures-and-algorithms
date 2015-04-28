@@ -63,6 +63,9 @@ public class ClosestPair {
 	// Declare new arraylist for point objects sorted by x-value
 	static ArrayList<Point> pointsX = new ArrayList<Point>();
 	
+	// Declare new arraylist for point objects sorted by y-value
+	static ArrayList<Point> pointsY = new ArrayList<Point>();
+	
 	
 	// Main method
 	public static void main(String[] args) {
@@ -86,6 +89,27 @@ public class ClosestPair {
 		Collections.sort(pointsX, new Comparator<Point>() {
 			public int compare(Point one, Point two) {
 				return Double.compare(one.getX(), two.getX());
+			}
+		});
+		
+		// Hardcode points into y-sorted arraylist
+		pointsY.add(new Point(2.0, 7.0));
+		pointsY.add(new Point(4.0, 13.0));
+		pointsY.add(new Point(5.0, 8.0));
+		pointsY.add(new Point(10.0, 5.0));
+		pointsY.add(new Point(14.0, 9.0));
+		pointsY.add(new Point(15.0, 5.0));
+		pointsY.add(new Point(17.0, 7.0));
+		pointsY.add(new Point(19.0, 10.0));
+		pointsY.add(new Point(22.0, 7.0));
+		pointsY.add(new Point(25.0, 10.0));
+		pointsY.add(new Point(29.0, 14.0));
+		pointsY.add(new Point(30.0, 2.0));
+		
+		// Sort the points by y coordinate
+		Collections.sort(pointsY, new Comparator<Point>() {
+			public int compare(Point one, Point two) {
+				return Double.compare(one.getY(), two.getY());
 			}
 		});
 		
@@ -183,7 +207,7 @@ public class ClosestPair {
 		Pair d2 = closestPair(secondHalf);
 		
 		// Check for pairs of points across split
-		Pair d3 = closestSplitPair(subset.get(median).getX(), subset, Math.min(d1.distance, d2.distance));
+		Pair d3 = closestSplitPair(subset.get(median).getX(), pointsY, Math.min(d1.distance, d2.distance));
 		
 		// Get indices for two subsets (with respect to original points arraylist)
 		int index1 = pointsX.indexOf(firstHalf.get(0));
@@ -194,15 +218,15 @@ public class ClosestPair {
 		// Print conquer status
 		System.out.println("Combining Problems: Point["+index1+"]...Point["+index2+"] and Point["+index3+"]...Point["+index4+"]");
 		
-		// If d1 is the closest pair
-		if (d1.distance < d2.distance && d2.distance < d3.distance) {
-			
+		// If d3 is the closest pair
+		if (d3.distance < d2.distance && d2.distance < d1.distance) {
+		
 			// Print found result
-			System.out.println("Found result: P1: ("+d1.p1.getX()+","+d1.p1.getY()+"), ("
-				+d1.p2.getX()+","+d1.p2.getY()+"), Distance: "+String.format("%.1f",d1.distance));
-			
+			System.out.println("Found result: P1: ("+d3.p1.getX()+","+d3.p1.getY()+"), ("
+					+d3.p2.getX()+","+d3.p2.getY()+"), Distance: "+String.format("%.1f",d3.distance));
+		
 			// And return new pair
-			return new Pair(d1.p1, d1.p2, d1.distance);
+			return new Pair(d3.p1, d3.p2, d3.distance);
 		}
 		// If d2 is the closest pair
 		else if (d2.distance < d3.distance && d2.distance < d1.distance) {
@@ -214,15 +238,15 @@ public class ClosestPair {
 			// And return new pair
 			return new Pair(d2.p1, d2.p2, d2.distance);
 		}
-		// Else, d3 must be closest pair
+		// Else, d1 must be closest pair
 		else {
 			
 			// Print found result
-			System.out.println("Found result: P1: ("+d3.p1.getX()+","+d3.p1.getY()+"), ("
-				+d3.p2.getX()+","+d3.p2.getY()+"), Distance: "+String.format("%.1f",d3.distance));
+			System.out.println("Found result: P1: ("+d1.p1.getX()+","+d1.p1.getY()+"), ("
+				+d1.p2.getX()+","+d1.p2.getY()+"), Distance: "+String.format("%.1f",d1.distance));
 			
 			// And return new pair
-			return new Pair(d3.p1, d3.p2, d3.distance);
+			return new Pair(d1.p1, d1.p2, d1.distance);
 		}
 		
 	} // End closestPair
@@ -242,18 +266,23 @@ public class ClosestPair {
 		}
 				
 		// Create new closestSplitPair (not updated)
-		Pair closestSplitPair = new Pair(null, null, Integer.MAX_VALUE);
+		Pair closestSplitPair = new Pair(null, null, Double.MAX_VALUE);
 		
-		// The inner loop only runs at most six times because the difference in the y-values of the points 
-		// must be less than the closest pair distance of the two subsets if the distance is to be computed
+		// Variable to keep track of least distances
+		double currentLeastDistance = Double.MAX_VALUE;
+		
+		// The inner loop only runs at most six times 
 		for (int i = 0; i < pointsWithinRange.size(); i++) {
-			for (int j = i+1; j < pointsWithinRange.size() && Math.abs(pointsWithinRange.get(j).getY() - pointsWithinRange.get(i).getY()) < d; j++) {
-				if (distance(pointsWithinRange.get(i), pointsWithinRange.get(j)) < d) {
-					// Update closestSplitPair
-					d = distance(pointsWithinRange.get(i), pointsWithinRange.get(j));
-					closestSplitPair.distance = d;
-					closestSplitPair.p1 = pointsWithinRange.get(i);
-					closestSplitPair.p2 = pointsWithinRange.get(j);
+			for (int j = i-3; j <= i+3; j++) {
+				if (j != i && j >= 0 && j < pointsWithinRange.size()) {
+					currentLeastDistance = distance(pointsWithinRange.get(i), pointsWithinRange.get(j));
+						if (currentLeastDistance < d) {
+							// Update closestSplitPair
+							d = currentLeastDistance;
+							closestSplitPair.distance = d;
+							closestSplitPair.p1 = pointsWithinRange.get(i);
+							closestSplitPair.p2 = pointsWithinRange.get(j);
+					}
 				}
 			}
 		}		
